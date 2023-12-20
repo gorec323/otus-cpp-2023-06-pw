@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.14)
 
 set(PATCH_VERSION 1 CACHE INTERNAL "Patch version. Default = 1")
 set(PROJECT_VERSION 0.0.${PATCH_VERSION} CACHE INTERNAL "Application version" FORCE)
 
-project(myapplication VERSION ${PROJECT_VERSION} LANGUAGES CXX)
+project(network_node VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
 configure_file(
     version.h.in
@@ -11,11 +11,46 @@ configure_file(
 )
 
 if (NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 20)
 endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(POLICY CMP0135)
+
+  cmake_policy(SET CMP0135 NEW)
+endif()
+
+include(FetchContent)
+
+# Нет CMakeLists.txt поэтому пришлось исопльзовать бустовую библиотеку
+FetchContent_Declare(
+    asio
+    GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+    GIT_TAG 814f67e # tag 1.29.0
+)
+
+# FetchContent_Declare{
+#     boostalign
+#     GIT_REPOOSITORY https://github.com/boostorg/align.git
+#     GIT_TAG master
+# }
+
+# FetchContent_Declare(
+#     boostasio
+#     GIT_REPOSITORY https://github.com/boostorg/asio.git
+#     GIT_TAG 222ce92 # boost-1.84.0
+# )
+
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(asio googletest)
 
 if (BUILD_TESTING)
     include(CTest)
@@ -35,6 +70,12 @@ install(TARGETS ${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
 PRIVATE
     ${CMAKE_BINARY_DIR}
+    ${asio_SOURCE_DIR}/asio/include
+)
+
+target_link_libraries(${PROJECT_NAME}
+PRIVATE
+    networklib
 )
 
 if (UNIX)
@@ -44,7 +85,7 @@ if (UNIX)
     set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
     set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
-    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "My application")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Network node application")
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "My Corporation")
     include(CPack)
 endif()
@@ -68,4 +109,3 @@ if(DOXYGEN_FOUND)
 else(DOXYGEN_FOUND)
     message(STATUS "Doxygen not found - reference manual will not be created")
 endif(DOXYGEN_FOUND)
-

@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.6)
 
-project(mylib  LANGUAGES CXX)
+project(networklib  LANGUAGES CXX)
 
 add_library(${PROJECT_NAME}
-    include/mylib.hpp
-    src/mylib.cpp
+    include/networknode.hpp
+    src/networknode.cpp
+    include/route.hpp
+    include/routetable.hpp
+    src/route.cpp
+
 )
 
 if (${BUILD_TESTING})
@@ -15,4 +19,7 @@ target_include_directories(${PROJECT_NAME}
 PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+
+PRIVATE
+    ${asio_SOURCE_DIR}/asio/include
 )
