@@ -8,7 +8,10 @@ add_library(${PROJECT_NAME}
     include/route.hpp
     include/routetable.hpp
     src/route.cpp
-
+    include/connectionsession.hpp
+    src/connectionsession.cpp
+    include/abstractnodeconnection.hpp
+    src/abstractnodeconnection.cpp
 )
 
 if (${BUILD_TESTING})
