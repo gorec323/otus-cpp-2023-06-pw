@@ -10,7 +10,7 @@ add_library(${PROJECT_NAME}
     src/route.cpp
     include/connectionsession.hpp
     src/connectionsession.cpp
-    include/abstractnodeconnection.hpp
+    include/abstractconnectionsession.hpp
     src/abstractnodeconnection.cpp
 )
 

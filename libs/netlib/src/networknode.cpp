@@ -79,9 +79,9 @@ awaitable<void> listen(tcp::acceptor& acceptor, NetworkNode &node)
 
         std::cout << client.remote_endpoint() << std::endl;
 
-        auto connection = std::make_shared<ConnectionSession>(std::move(client));
-        node.newConnection(connection);
-        connection->start();
+        auto session = std::make_shared<ConnectionSession>(std::move(client));
+        node.newConnection(session);
+        session->start();
 
 //        auto ex = client.get_executor();
 //        co_spawn(ex, proxy(std::move(client)), asio::detached);

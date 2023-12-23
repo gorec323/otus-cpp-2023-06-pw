@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <set>
-#include "abstractnodeconnection.hpp"
+#include "abstractconnectionsession.hpp"
 
 namespace netlib {
 
@@ -17,7 +17,7 @@ public:
     /// @return 
     int run(std::uint16_t port = 9000, std::size_t threadsCount = 1);
 
-    using shared_connection_ptr = std::shared_ptr<AbstractNodeConnection>;
+    using shared_connection_ptr = std::shared_ptr<AbstractConnectionSession>;
     ///
     /// \brief newConnection Обработчик нового соединения
     /// \param connection Новое соединение
