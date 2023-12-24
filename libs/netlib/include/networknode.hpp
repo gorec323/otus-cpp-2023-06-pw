@@ -4,6 +4,9 @@
 #include <memory>
 #include <set>
 #include "abstractconnectionsession.hpp"
+#include <optional>
+#include <vector>
+#include "linksettings.hpp"
 
 namespace netlib {
 
@@ -11,11 +14,12 @@ namespace netlib {
 class NetworkNode
 {
 public:
+    void init(std::string configName = {});
     /// @brief Блокирующий вызов запуска узла
     /// @param port Порт
     /// @param threadsCount Количество потоков обработки
     /// @return 
-    int run(std::uint16_t port = 9000, std::size_t threadsCount = 1);
+    int run(std::size_t threadsCount = 1);
 
     using shared_connection_ptr = std::shared_ptr<AbstractConnectionSession>;
     ///
@@ -29,6 +33,9 @@ public:
 private:
     void onConnectionsChanged();
 
+    bool m_initialized {false};
+    std::optional<std::uint16_t> m_serverPort;
+    std::vector<LinkSettings> m_autoConnectionsStrings;
     std::set<shared_connection_ptr> m_connections;
 
 };

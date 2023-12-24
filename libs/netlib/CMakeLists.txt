@@ -12,6 +12,9 @@ add_library(${PROJECT_NAME}
     src/connectionsession.cpp
     include/abstractconnectionsession.hpp
     src/abstractnodeconnection.cpp
+    include/linksettings.hpp
+    include/jsonconfigreader.hpp
+    src/jsonconfigreader.cpp
 )
 
 if (${BUILD_TESTING})
@@ -25,4 +28,9 @@ PUBLIC
 
 PRIVATE
     ${asio_SOURCE_DIR}/asio/include
+)
+
+target_link_libraries(${PROJECT_NAME}
+PRIVATE
+    nlohmann_json::nlohmann_json
 )

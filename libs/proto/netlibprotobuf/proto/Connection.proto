@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option optimize_for = LITE_RUNTIME;
+
+package NetLib;
+
+// минимальная транспортная информация
+message TransportInfo
+{
+    // версия протокола взаимодействия между узлами
+    optional uint64 transportVersion = 1;
+    // полный адрес отправителя
+    optional string sender = 2;
+    // список узлов получателей сообщения
+    repeated string dests = 3;
+};
+
+// Инициализация регистрация на узле
+message RegistrationRequest
+{
+    // имя регистрирующегося узла
+    optional string node_name = 1;
+    // пароль
+    optional string password = 2;
+};
+
+
+// Ответ с результатом регистрации на узле
+message RegistrationResponse
+{
+    // Признак успешной регистрации
+    optional uint32 error_code = 1;
+    // Имя узла, на котором прошла регистрация в случае успеха
+    optional string node_name = 2;
+};
+
+// Контроль соединения, одна строка таблицы маршрутизации
+message RouteLine
+{
+    // имя узла
+    optional string node_name = 1;
+    // маршрут до узла
+    repeated string routeToClient = 2;
+};

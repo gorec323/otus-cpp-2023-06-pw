@@ -31,6 +31,19 @@ FetchContent_Declare(
     GIT_TAG 814f67e # tag 1.29.0
 )
 
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+#    https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+    GIT_TAG 9cca280 # tag v3.11.3
+)
+
+#FetchContent_Declare(
+#    protobuf
+#    GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
+#    GIT_TAG v25.1
+#)
+
 # FetchContent_Declare{
 #     boostalign
 #     GIT_REPOOSITORY https://github.com/boostorg/align.git
@@ -44,13 +57,13 @@ FetchContent_Declare(
 # )
 
 FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    googletest
+    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(asio googletest)
+FetchContent_MakeAvailable(asio json googletest)
 
 if (BUILD_TESTING)
     include(CTest)

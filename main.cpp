@@ -10,19 +10,16 @@ int main(int argc, const char *argv[])
 
     cout << "Network node version: " << PROJECT_VERSION << endl;
 
-    // const auto paramsSize = argc;
-    // if (paramsSize != 2) {
-    //     std::cout << "Usage:" << std::endl;
-    //     std::cout << argv[0] << " [node port number]" << std::endl;
-    //     return 1;
-    // }
-
-    // обработка параметра командной строки с числом команд в блоке
-    // const int bulkCommandsLimit = std::atoi(argv[1]);
-    // if (bulkCommandsLimit < 1)
-    //     return 0;
+    const auto paramsSize = argc;
+    std::string configName;
+    if (paramsSize == 2) {
+        configName = argv[1];
+    }
 
     netlib::NetworkNode networkNode;
+
+    if (!configName.empty())
+        networkNode.init(std::move(configName));
 
     return networkNode.run();
 }

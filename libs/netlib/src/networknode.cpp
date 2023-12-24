@@ -4,6 +4,8 @@
 #include <set>
 #include <asio/experimental/as_tuple.hpp>
 #include <asio/experimental/awaitable_operators.hpp>
+#include <jsonconfigreader.hpp>
+
 #include "networknode.hpp"
 #include "connectionsession.hpp"
 
@@ -88,12 +90,31 @@ awaitable<void> listen(tcp::acceptor& acceptor, NetworkNode &node)
     }
 }
 
-int NetworkNode::run(std::uint16_t port, std::size_t threaadCount)
+void NetworkNode::init(std::string configName)
+{
+    if (m_initialized)
+       return;
+
+    auto configFileName = configName;
+    if (configFileName.empty()) {
+        static const auto DEFAULT_CONFIG_NAME  = "node_config";
+        configFileName = DEFAULT_CONFIG_NAME;
+    }
+
+    configFileName.append(".json");
+    JsonConfigReader cfgReaderr{configFileName};
+    m_serverPort = cfgReaderr.nodePort();
+
+    m_initialized = true;
+}
+
+int NetworkNode::run(std::size_t threaadCount)
 {
     try {
 
         asio::io_context ctx;
-        tcp::endpoint listen_endpoint = {tcp::v6(), port};
+        const std::uint16_t DEFAULT_NODE_PORT  {9001};
+        tcp::endpoint listen_endpoint = {tcp::v6(), m_serverPort.value_or(DEFAULT_NODE_PORT)};
 
         // todo read settings client connections
 
