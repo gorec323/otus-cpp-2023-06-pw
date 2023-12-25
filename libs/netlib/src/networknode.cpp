@@ -8,6 +8,7 @@
 
 #include "networknode.hpp"
 #include "connectionsession.hpp"
+#include "clientconnectionsession.hpp"
 
 namespace netlib {
 
@@ -81,7 +82,7 @@ awaitable<void> listen(tcp::acceptor& acceptor, NetworkNode &node)
 
         std::cout << client.remote_endpoint() << std::endl;
 
-        auto session = std::make_shared<ConnectionSession>(std::move(client));
+        auto session = std::make_shared<ServerSideConnectionSession>(std::move(client));
         node.newConnection(session);
         session->start();
 
@@ -89,6 +90,29 @@ awaitable<void> listen(tcp::acceptor& acceptor, NetworkNode &node)
 //        co_spawn(ex, proxy(std::move(client)), asio::detached);
     }
 }
+
+awaitable<void> clients(asio::io_context &ctx, const std::vector<LinkSettings> &settings, NetworkNode &node)
+{
+    for (auto &&connectionSetting : settings) {
+//        auto [e, client] = co_await acceptor.async_accept(use_nothrow_awaitable);
+//        if (e) {
+//            std::cerr << "listen" << e << std::endl;
+//            break;
+//        }
+
+//        std::cout << client.remote_endpoint() << std::endl;
+
+        auto session = std::make_shared<ClientConnectionSession>(tcp::socket{ctx}, connectionSetting);
+//        node.newConnection(session);
+        session->start();
+
+//        auto ex = client.get_executor();
+//        co_spawn(ex, proxy(std::move(client)), asio::detached);
+    }
+
+    return {};
+}
+
 
 void NetworkNode::init(std::string configName)
 {
@@ -104,14 +128,15 @@ void NetworkNode::init(std::string configName)
     configFileName.append(".json");
     JsonConfigReader cfgReaderr{configFileName};
     m_serverPort = cfgReaderr.nodePort();
+    m_autoConnectionsSettings = cfgReaderr.linkSettings();
 
     m_initialized = true;
 }
 
-int NetworkNode::run(std::size_t threaadCount)
+int NetworkNode::run(std::size_t threadsCount)
 {
     try {
-
+        init();
         asio::io_context ctx;
         const std::uint16_t DEFAULT_NODE_PORT  {9001};
         tcp::endpoint listen_endpoint = {tcp::v6(), m_serverPort.value_or(DEFAULT_NODE_PORT)};
@@ -121,6 +146,8 @@ int NetworkNode::run(std::size_t threaadCount)
         tcp::acceptor acceptor(ctx, listen_endpoint);
 
         co_spawn(ctx, listen(acceptor, *this), asio::detached);
+
+        co_spawn(ctx, clients(ctx, m_autoConnectionsSettings, *this), asio::detached);
 
         ctx.run();
     } catch(const std::exception& e) {

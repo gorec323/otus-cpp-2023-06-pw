@@ -22,6 +22,17 @@ bool JsonConfigReader::load(std::filesystem::path configPath)
             json jsonConfig = json::parse(f);
             if (jsonConfig.contains("port"))
                 m_nodePort  = jsonConfig["port"].get<std::uint16_t>();
+
+            if (jsonConfig.contains("autoconnection")) {
+                const auto jsonAutoConnections = jsonConfig["autoconnection"];
+                if (jsonAutoConnections.is_array()) {
+                    for (const auto &jaObject : jsonAutoConnections) {
+                        m_linkSettings.emplace_back(LinkSettings{jaObject["address"].get<std::string>(),
+                                                    jaObject["port"].get<std::uint16_t>()});
+
+                    }
+                }
+            }
         } catch (...) {
         }
 

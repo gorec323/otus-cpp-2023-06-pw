@@ -35,7 +35,7 @@ private:
 
     bool m_initialized {false};
     std::optional<std::uint16_t> m_serverPort;
-    std::vector<LinkSettings> m_autoConnectionsStrings;
+    std::vector<LinkSettings> m_autoConnectionsSettings;
     std::set<shared_connection_ptr> m_connections;
 
 };

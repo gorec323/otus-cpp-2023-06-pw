@@ -15,6 +15,10 @@ add_library(${PROJECT_NAME}
     include/linksettings.hpp
     include/jsonconfigreader.hpp
     src/jsonconfigreader.cpp
+    include/socketconnectionsession.hpp
+    src/socketconnectionsession.cpp
+    include/clientconnectionsession.hpp
+    src/clientconnectionsession.cpp
 )
 
 if (${BUILD_TESTING})
