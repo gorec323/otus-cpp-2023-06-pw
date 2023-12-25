@@ -20,11 +20,11 @@ void ServerSideConnectionSession::start()
 
     auto ex = socket().get_executor();
     co_spawn(ex, [self = shared_from_base<ServerSideConnectionSession>()]{ return self->reader(); },
-    asio::detached
+        asio::detached
     );
 
     co_spawn(ex, [self = shared_from_base<ServerSideConnectionSession>()]{ return self->writer(); },
-    asio::detached
+        asio::detached
     );
 }
 
