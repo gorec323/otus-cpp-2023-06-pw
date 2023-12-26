@@ -1,0 +1,9 @@
+{
+    "port": 9011,
+    "autoconnection": [
+        {
+            "address": "localhost",
+            "port": 9021
+        }
+    ]
+}
