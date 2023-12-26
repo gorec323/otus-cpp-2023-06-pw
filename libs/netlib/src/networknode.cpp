@@ -110,7 +110,7 @@ awaitable<void> clients(asio::io_context &ctx, const std::vector<LinkSettings> &
 //        co_spawn(ex, proxy(std::move(client)), asio::detached);
     }
 
-    return {};
+    co_return ;
 }
 
 

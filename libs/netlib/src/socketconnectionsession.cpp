@@ -1,3 +1,4 @@
+#include <iostream>
 #include <asio/use_awaitable.hpp>
 #include "socketconnectionsession.hpp"
 
@@ -14,7 +15,7 @@ SocketConnectionSession::SocketConnectionSession(asio::ip::tcp::socket socket, b
     m_timer {m_socket.get_executor()},
     m_serverSide {serverSide}
 {
-
+    m_timer.expires_at(std::chrono::steady_clock::time_point::max());
 }
 
 bool SocketConnectionSession::serverSide() const noexcept
@@ -43,6 +44,7 @@ asio::awaitable<void> SocketConnectionSession::writer()
                                            asio::buffer(m_writeMsgs.front()), use_awaitable);
                 m_writeMsgs.pop_front();
             }
+            std::cout << "SocketConnectionSession::writer() "  << std::endl;
         }
     } catch (std::exception&) {
         stop();
