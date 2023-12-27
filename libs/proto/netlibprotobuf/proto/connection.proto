@@ -7,31 +7,10 @@ package NetLib;
 // минимальная транспортная информация
 message TransportInfo
 {
-    // версия протокола взаимодействия между узлами
-    optional uint64 transportVersion = 1;
-    // полный адрес отправителя
-    optional string sender = 2;
+    // уникальный идентификатор отправителя
+    optional string sender = 1;
     // список узлов получателей сообщения
-    repeated string dests = 3;
-};
-
-// Инициализация регистрация на узле
-message RegistrationRequest
-{
-    // имя регистрирующегося узла
-    optional string node_name = 1;
-    // пароль
-    optional string password = 2;
-};
-
-
-// Ответ с результатом регистрации на узле
-message RegistrationResponse
-{
-    // Признак успешной регистрации
-    optional uint32 error_code = 1;
-    // Имя узла, на котором прошла регистрация в случае успеха
-    optional string node_name = 2;
+    repeated string dest = 2;
 };
 
 // Контроль соединения, одна строка таблицы маршрутизации
@@ -41,4 +20,36 @@ message RouteLine
     optional string node_name = 1;
     // маршрут до узла
     repeated string routeToClient = 2;
+};
+
+// Инициализация регистрация на узле
+message RegistrationRequest
+{
+    // имя регистрирующегося узла
+    optional string node_name = 1;
+    // пароль
+    optional string password = 2;
+    // маршруты
+    repeated RouteLine routes = 3;
+};
+
+// Ответ с результатом регистрации на узле
+message RegistrationResponse
+{
+    // Признак успешной регистрации
+    optional uint32 error_code = 1;
+    // Имя узла, на котором прошла регистрация в случае успеха
+    optional string node_name = 2;
+
+    // маршруты
+    repeated RouteLine routes = 3;
+};
+
+// Туннельное сообщение
+message TunnelData
+{
+    // Транспортная информация
+    optional TransportInfo transport_info = 1;
+    // Имя узла, на котором прошла регистрация в случае успеха
+    optional bytes tunnelData = 2;
 };

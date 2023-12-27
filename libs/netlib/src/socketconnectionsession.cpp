@@ -23,13 +23,23 @@ bool SocketConnectionSession::serverSide() const noexcept
     return m_serverSide;
 }
 
-
-
 void SocketConnectionSession::stop()
 {
-    //      room_.leave(shared_from_this());
     m_socket.close();
     m_timer.cancel();
+}
+
+void SocketConnectionSession::subscribe(data_callback_t handler)
+{
+    m_callbacks.emplace_back(std::move(handler));
+}
+
+void SocketConnectionSession::nootifyNewData(const std::string &data)
+{
+    for (auto &&callback : m_callbacks) {
+        if (callback)
+            callback(data);
+    }
 }
 
 asio::awaitable<void> SocketConnectionSession::writer()
@@ -51,7 +61,11 @@ asio::awaitable<void> SocketConnectionSession::writer()
     }
 }
 
-
+asio::awaitable<void> SocketConnectionSession::idle()
+{
+    asio::error_code ec;
+    co_await m_timer.async_wait(redirect_error(use_awaitable, ec));
+}
 
 asio::ip::tcp::socket &SocketConnectionSession::socket()
 {

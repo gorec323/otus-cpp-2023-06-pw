@@ -16,8 +16,6 @@ ServerSideConnectionSession::ServerSideConnectionSession(tcp::socket socket):
 
 void ServerSideConnectionSession::start()
 {
-    //    room_.join(shared_from_this());
-
     auto ex = socket().get_executor();
     co_spawn(ex, [self = shared_from_base<ServerSideConnectionSession>()]{ return self->reader(); },
         asio::detached
@@ -36,9 +34,7 @@ awaitable<void> ServerSideConnectionSession::reader()
                                                             asio::dynamic_buffer(read_msg, 1024), "\n", use_awaitable);
 
             std::cout << "ServerSideConnectionSession::reader() " << n << std::endl;
-            // эхо
-//            m_writeMsgs.emplace_back(read_msg.substr(0, n));
-            //            room_.deliver(read_msg.substr(0, n));
+            nootifyNewData(read_msg.substr(0, n));
             read_msg.erase(0, n);
         }
     } catch (std::exception& e) {

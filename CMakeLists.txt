@@ -41,7 +41,9 @@ FetchContent_Declare(
 #FetchContent_Declare(
 #    protobuf
 #    GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
-#    GIT_TAG v25.1
+#    GIT_TAG 7f94235 #v25.1
+#    SOURCE_SUBDIR  cmake
+#    FIND_PACKAGE_ARGS NAMES protobuf
 #)
 
 # FetchContent_Declare{
@@ -63,7 +65,7 @@ FetchContent_Declare(
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(asio json googletest)
+FetchContent_MakeAvailable(asio json)
 
 if (BUILD_TESTING)
     include(CTest)

@@ -94,20 +94,10 @@ awaitable<void> listen(tcp::acceptor& acceptor, NetworkNode &node)
 awaitable<void> clients(asio::io_context &ctx, const std::vector<LinkSettings> &settings, NetworkNode &node)
 {
     for (auto &&connectionSetting : settings) {
-//        auto [e, client] = co_await acceptor.async_accept(use_nothrow_awaitable);
-//        if (e) {
-//            std::cerr << "listen" << e << std::endl;
-//            break;
-//        }
-
-//        std::cout << client.remote_endpoint() << std::endl;
 
         auto session = std::make_shared<ClientConnectionSession>(tcp::socket{ctx}, connectionSetting);
 //        node.newConnection(session);
         session->start();
-
-//        auto ex = client.get_executor();
-//        co_spawn(ex, proxy(std::move(client)), asio::detached);
     }
 
     co_return ;

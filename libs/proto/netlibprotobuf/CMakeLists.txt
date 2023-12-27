@@ -2,14 +2,13 @@ cmake_minimum_required(VERSION 3.7)
 
 project(netlibprotobuflib LANGUAGES CXX)
 
-#include(ProtobufGenerateDfpost)
-
-find_package(Protobuf REQUIRED) # NO_DEFAULT_PATH)
+find_package(Protobuf REQUIRED)
 
 set(NETLIB_PROTO_DIR ${CMAKE_CURRENT_SOURCE_DIR}/proto)
 
 file(GLOB NETLIB_PROTO_FILES
     ${NETLIB_PROTO_DIR}/connection.proto
+    ${NETLIB_PROTO_DIR}/information_packet.proto
 )
 
 # TODO: исправить все warning-и в файлах RDMP протокола
@@ -20,8 +19,6 @@ add_library(${PROJECT_NAME} STATIC ${PROTO_SRCS} ${PROTO_HDRS} ${NETLIB_PROTO_FI
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC PROTOBUF_USE_DLLS)
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-
-#enable_msvc_system_include(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME}
 SYSTEM

@@ -1,5 +1,9 @@
 #include <iostream>
 #include <functional>
+#include <chrono>
+
+#include <asio/experimental/awaitable_operators.hpp>
+#include <asio/experimental/as_tuple.hpp>
 #include "clientconnectionsession.hpp"
 
 namespace netlib {
@@ -7,12 +11,23 @@ namespace netlib {
 using asio::ip::tcp;
 using asio::awaitable;
 using asio::use_awaitable;
+using std::chrono::steady_clock;
+
+namespace this_coro = asio::this_coro;
+using namespace asio::experimental::awaitable_operators;
+using namespace std::literals::chrono_literals;
 
 ClientConnectionSession::ClientConnectionSession(asio::ip::tcp::socket socket, const LinkSettings &connectionSettings):
     SocketConnectionSession(std::move(socket), false),
     m_connectionSettings {connectionSettings},
     m_deadline {this->socket().get_executor()}
 {
+}
+
+ClientConnectionSession::~ClientConnectionSession()
+{
+    m_stopped = true;
+    stop();
 }
 
 //using resolve_it_t = asio::ip::tcp::resolver::results_type::iterator;
@@ -37,10 +52,28 @@ ClientConnectionSession::ClientConnectionSession(asio::ip::tcp::socket socket, c
 //    }
 //}
 
+constexpr auto use_nothrow_awaitable = asio::experimental::as_tuple(asio::use_awaitable);
+
+awaitable<void> timeout(steady_clock::duration duration)
+{
+    asio::steady_timer timer(co_await this_coro::executor);
+    timer.expires_after(duration);
+    co_await timer.async_wait(use_nothrow_awaitable);
+
+}
 asio::awaitable<bool> ClientConnectionSession::connect(asio::ip::tcp::endpoint endPoint)
 {
-    co_await socket().async_connect(endPoint, use_awaitable);
+    const auto res = co_await (socket().async_connect(endPoint, use_awaitable)
+                                   || timeout(10s)
+                                   );
+
+    if (res.index() == 1) {
+        socket().close();
+         co_return false; // connect timed out
+    }
+
     co_return socket().is_open();
+
 }
 
 void ClientConnectionSession::start()
@@ -55,36 +88,50 @@ void ClientConnectionSession::start()
     co_spawn(ex, [self = shared_from_base<ClientConnectionSession>(), this]() -> asio::awaitable<void>
         {
             auto ex = self->socket().get_executor();
+
             tcp::resolver r(ex);
             const auto endPoints = co_await r.async_resolve(self->m_connectionSettings.address, std::to_string(self->m_connectionSettings.port.value()), use_awaitable);
-            bool connected {false};
-            for (auto &&endPoint : endPoints) {
-                auto connected = co_await connect(endPoint);
-                if (connected)
-                    break;
+            while (!m_stopped) {
+                bool connected {false};
+                for (auto &&endPoint : endPoints) {
+                    connected = co_await connect(endPoint);
+                    if (connected) {
+                        std::cout <<  "ClientConnectionSession::start() connected to " << endPoint.endpoint() << std::endl;
+                        break;
+                    }
+                }
+
+                if (m_stopped)
+                    co_return;
+
+                if (!connected) {
+                    co_await timeout(10s); // ожидание для переподключения
+                    continue;
+                }
+
+
+                co_spawn(ex, [self = shared_from_base<ClientConnectionSession>()]
+                    {
+                        return self->reader();
+                    },
+                    asio::detached
+                );
+
+                co_spawn(ex, [self = shared_from_base<ClientConnectionSession>()]
+                    {
+                        return self->writer();
+                    },
+                    asio::detached
+                );
+
+                co_await idle();
+
             }
-
-            co_spawn(ex, [self = shared_from_base<ClientConnectionSession>()]{ return self->reader(); },
-                asio::detached
-            );
-
-            co_spawn(ex, [self = shared_from_base<ClientConnectionSession>()]{ return self->writer(); },
-                asio::detached
-            );
-//            start_connect(endPoints.begin());
 
         },
         asio::detached
     );
 
-//    tcp::resolver r(socket().get_executor());
-//    m_endPoints = r.resolve(m_connectionSettings.address, std::to_string(m_connectionSettings.port.value()));
-//    start_connect(m_endPoints.begin());
-
-//        // Start the deadline actor. You will note that we're not setting any
-//        // particular deadline here. Instead, the connect and input actors will
-//        // update the deadline prior to each asynchronous operation.
-//    m_deadline.async_wait(std::bind(&ClientConnectionSession::checkDeadline, this));
 }
 
 //void ClientConnectionSession::start_connect(tcp::resolver::results_type::iterator endpoint_iter)
@@ -159,8 +206,7 @@ void ClientConnectionSession::checkDeadline()
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
-    if (m_deadline.expiry() <= asio::steady_timer::clock_type::now())
-    {
+    if (m_deadline.expiry() <= asio::steady_timer::clock_type::now()) {
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
         socket().close();
@@ -184,6 +230,7 @@ asio::awaitable<void> ClientConnectionSession::reader()
             // эхо
             //            m_writeMsgs.emplace_back(read_msg.substr(0, n));
             //            room_.deliver(read_msg.substr(0, n));
+            nootifyNewData(read_msg.substr(0, n));
             read_msg.erase(0, n);
         }
     } catch (std::exception& e) {

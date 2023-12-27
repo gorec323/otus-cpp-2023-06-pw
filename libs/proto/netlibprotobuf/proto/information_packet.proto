@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option optimize_for = LITE_RUNTIME;
+
+package NetLib;
+
+// Информационный пакет
+message InformationPacket
+{
+  // Типы пакетов
+    enum PacketType
+    {
+        // Требования Protobuf syntax 3
+        Undefined = 0;
+
+        // Квитанция
+        Ticket = 1;
+
+        // Запрос регистрации
+        RegistrationRequest = 2;
+
+        // Ответ на регистрацию
+        RegistrationResponse = 3;
+
+        // Бинарные данные туннельного протокола
+        TunnelBinaryPacket = 4;
+    }
+
+// Тип пакета
+optional uint32 type = 1;
+
+// Идентификатор пакета
+optional uint32 id = 2;
+
+// Данные пакета
+optional bytes data = 3;
+
+}

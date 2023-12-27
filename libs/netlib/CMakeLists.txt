@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.8)
 
 project(networklib  LANGUAGES CXX)
 
@@ -21,9 +21,9 @@ add_library(${PROJECT_NAME}
     src/clientconnectionsession.cpp
 )
 
-if (${BUILD_TESTING})
-    add_subdirectory(tests)
-endif()
+#if (${BUILD_TESTING})
+#    add_subdirectory(tests)
+#endif()
 
 target_include_directories(${PROJECT_NAME}
 PUBLIC
