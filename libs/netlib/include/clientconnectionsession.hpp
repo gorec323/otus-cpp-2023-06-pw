@@ -15,7 +15,6 @@ public:
 
 private:
     asio::awaitable<bool> connect(asio::ip::tcp::endpoint endPoint);
-    void checkDeadline();
 
     asio::awaitable<void> reader();
 

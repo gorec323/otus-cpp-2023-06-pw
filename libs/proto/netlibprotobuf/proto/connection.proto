@@ -19,7 +19,7 @@ message RouteLine
     // имя узла
     optional string node_name = 1;
     // маршрут до узла
-    repeated string routeToClient = 2;
+    repeated string route_nodes = 2;
 };
 
 // Инициализация регистрация на узле
@@ -29,8 +29,6 @@ message RegistrationRequest
     optional string node_name = 1;
     // пароль
     optional string password = 2;
-    // маршруты
-    repeated RouteLine routes = 3;
 };
 
 // Ответ с результатом регистрации на узле
@@ -40,10 +38,34 @@ message RegistrationResponse
     optional uint32 error_code = 1;
     // Имя узла, на котором прошла регистрация в случае успеха
     optional string node_name = 2;
-
-    // маршруты
-    repeated RouteLine routes = 3;
 };
+
+// Информационное сообщение о маршрутах
+message RoutesInfo
+{
+    // Имя узла
+    optional string node_name = 1;
+    // информация о маршрутах этого узла
+    repeated RouteLine routes = 2;
+}
+
+// Подписка на информацию о маршрутах
+message RoutesSubscriptionRequest
+{
+    // Типы пакетов
+    enum SubscriptionType
+    {
+    // Требования Protobuf syntax 3
+    Undefined = 0;
+
+    // Квитанция
+    Subscribe = 1;
+
+    // Запрос регистрации
+    Unsubscrube = 2;
+    }
+    optional SubscriptionType subscription = 1;
+}
 
 // Туннельное сообщение
 message TunnelData

@@ -6,6 +6,9 @@
 
 namespace netlib {
 
+///
+/// \brief The JsonConfigReader class Считыватель настроек из json файла
+///
 class JsonConfigReader
 {
 public:

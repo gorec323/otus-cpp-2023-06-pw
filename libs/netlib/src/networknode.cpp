@@ -23,54 +23,6 @@ using namespace std::literals::chrono_literals;
 
 constexpr auto use_nothrow_awaitable = asio::experimental::as_tuple(asio::use_awaitable);
 
-//awaitable<void> timeout(steady_clock::duration duration)
-//{
-//    asio::steady_timer timer(co_await this_coro::executor);
-//    timer.expires_after(duration);
-//    co_await timer.async_wait(use_nothrow_awaitable);
-//}
-
-//awaitable<void> transfer(tcp::socket& from, tcp::socket& to)
-//{
-//    std::array<char, 1024> data;
-
-//    for (;;) {
-//        const auto result1 = co_await (from.async_read_some(buffer(data), use_nothrow_awaitable)
-//                                 || timeout(5s)
-//                                 );
-
-//        if (result1.index() == 1)
-//            continue;
-//        // co_return; // timed out
-
-//        auto [e1, n1] = std::get<0>(result1);
-//        if (e1)
-//            break;
-
-//        std::cout << std::string{data.data(), n1} << std::endl;
-//        const auto result2 = co_await (
-//                    // async_write(to, buffer(data, n1), use_nothrow_awaitable)
-//                    async_write(from, buffer(data, n1), use_nothrow_awaitable)
-//                    || timeout(1s)
-//                    );
-
-//        if (result2.index() == 1)
-//            co_return; // timed out
-
-//        auto [e2, n2] = std::get<0>(result2);
-//        if (e2)
-//            break;
-//    }
-
-//}
-
-//awaitable<void> proxy(tcp::socket client)
-//{
-//    tcp::socket server(client.get_executor());
-
-//    co_await transfer(client, server);
-//}
-
 awaitable<void> listen(tcp::acceptor& acceptor, NetworkNode &node)
 {
     for (;;) {
@@ -85,9 +37,6 @@ awaitable<void> listen(tcp::acceptor& acceptor, NetworkNode &node)
         auto session = std::make_shared<ServerSideConnectionSession>(std::move(client));
         node.newConnection(session);
         session->start();
-
-//        auto ex = client.get_executor();
-//        co_spawn(ex, proxy(std::move(client)), asio::detached);
     }
 }
 
@@ -102,7 +51,6 @@ awaitable<void> clients(asio::io_context &ctx, const std::vector<LinkSettings> &
 
     co_return ;
 }
-
 
 void NetworkNode::init(std::string configName)
 {
@@ -130,8 +78,6 @@ int NetworkNode::run(std::size_t threadsCount)
         asio::io_context ctx;
         const std::uint16_t DEFAULT_NODE_PORT  {9001};
         tcp::endpoint listen_endpoint = {tcp::v6(), m_serverPort.value_or(DEFAULT_NODE_PORT)};
-
-        // todo read settings client connections
 
         tcp::acceptor acceptor(ctx, listen_endpoint);
 

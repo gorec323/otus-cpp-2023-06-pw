@@ -10,7 +10,6 @@ using asio::use_awaitable;
 
 SocketConnectionSession::SocketConnectionSession(asio::ip::tcp::socket socket, bool serverSide):
     AbstractConnectionSession(),
-//    std::enable_shared_from_this<ConnectionSession>(),
     m_socket {std::move(socket)},
     m_timer {m_socket.get_executor()},
     m_serverSide {serverSide}
